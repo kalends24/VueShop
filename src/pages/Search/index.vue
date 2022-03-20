@@ -161,7 +161,7 @@ export default {
         /* 平台售卖属性带的参数 */
         props: [],
         /* 品牌 */
-        trademark: " ",
+        trademark: "",
       },
     };
   },
