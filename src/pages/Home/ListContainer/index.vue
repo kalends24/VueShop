@@ -4,19 +4,17 @@
     <div class="sortList clearfix">
         <div class="center">
             <!--banner轮播-->
-            <div class="swiper-container" id="mySwiper">
+                        <Carousel :list='bannerList'></Carousel>
+         <!--  <div class="swiper-container" ref="mySwiper">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <img src="./images/banner1.jpg" />
+                    <div class="swiper-slide" v-for="(carousel,index) in bannerList" :key="carousel.id">
+                        <img :src="carousel.imgUrl" />
                     </div>
                 </div>
-                <!-- 如果需要分页器 -->
                 <div class="swiper-pagination"></div>
-
-                <!-- 如果需要导航按钮 -->
                 <div class="swiper-button-prev"></div>
                 <div class="swiper-button-next"></div>
-            </div>
+            </div>   -->
         </div>
         <div class="right">
             <div class="news">
@@ -26,69 +24,59 @@
                 </h4>
                 <div class="clearix"></div>
                 <ul class="news-list unstyled">
-                    <li>
-                        <span class="bold">[特惠]</span>备战开学季 全民半价购数码
-                    </li>
-                    <li>
-                        <span class="bold">[公告]</span>备战开学季 全民半价购数码
-                    </li>
-                    <li>
-                        <span class="bold">[特惠]</span>备战开学季 全民半价购数码
-                    </li>
-                    <li>
-                        <span class="bold">[公告]</span>备战开学季 全民半价购数码
-                    </li>
-                    <li>
-                        <span class="bold">[特惠]</span>备战开学季 全民半价购数码
-                    </li>
+                    <li><span class="bold">[特惠]</span>备战开学季 全民半价购数码</li>
+                    <li><span class="bold">[公告]</span>备战开学季 全民半价购数码</li>
+                    <li><span class="bold">[特惠]</span>备战开学季 全民半价购数码</li>
+                    <li><span class="bold">[公告]</span>备战开学季 全民半价购数码</li>
+                    <li><span class="bold">[特惠]</span>备战开学季 全民半价购数码</li>
                 </ul>
             </div>
             <ul class="lifeservices">
-                <li class=" life-item ">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">话费</span>
                 </li>
-                <li class=" life-item ">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">机票</span>
                 </li>
-                <li class=" life-item ">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">电影票</span>
                 </li>
-                <li class=" life-item ">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">游戏</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">彩票</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">加油站</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">酒店</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">火车票</span>
                 </li>
-                <li class=" life-item ">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">众筹</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">理财</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">礼品卡</span>
                 </li>
-                <li class=" life-item">
+                <li class="life-item">
                     <i class="list-item"></i>
                     <span class="service-intro">白条</span>
                 </li>
@@ -102,9 +90,81 @@
 </template>
 
 <script>
+import {
+    mapState
+} from 'vuex'
+import Swiper from 'swiper'
 export default {
+    mounted() {
+        /* 派发action 通过Vuex发起mockserve请求，将数据存储在仓库中 */
+        this.$store.dispatch('getBannerList');
+        //不是完美的写法 因为 服务器返回的数据给出后 v-for需要一定的时间重新渲染，
+        /*   setTimeout(() => {
+              var mySwiper = new Swiper('.swiper-container', {
+                  loop: true, // 循环模式选项
 
-}
+                  // 如果需要分页器
+                  pagination: {
+                      el: '.swiper-pagination',
+                      clickable:true
+                  },
+
+                  // 如果需要前进后退按钮
+                  navigation: {
+                      nextEl: '.swiper-button-next',
+                      prevEl: '.swiper-button-prev',
+                  },
+
+                  // 如果需要滚动条
+                  scrollbar: {
+                      el: '.swiper-scrollbar',
+                  },
+              })
+          }, 1000); */
+
+    },
+    computed: {
+        ...mapState({
+            bannerList: state => {
+                return state.home.bannerList
+            }
+        })
+    },
+    // watch: {
+    //     bannerList: {
+    //         immediate: true,
+    //         handler(newValue, oldValue) {
+    //             /**如果执行handler方法 代表bannerList数据有值了 当前的方法只能保证bannerList有值了 没办法包装v-for是否已经执行
+    //              * v-for执行完毕才有结构
+    //              * nextTick：在下次dom更新 循环结束之后执行延迟回调，在修改数据后立即使用这个方法，获取更新后的dom
+    //              */
+    //             this.$nextTick(() => {
+    //                 var mySwiper = new Swiper(this.$refs.mySwiper, {
+    //                     loop: true, // 循环模式选项
+
+    //                     // 如果需要分页器
+    //                     pagination: {
+    //                         el: '.swiper-pagination',
+    //                         clickable: true
+    //                     },
+
+    //                     // 如果需要前进后退按钮
+    //                     navigation: {
+    //                         nextEl: '.swiper-button-next',
+    //                         prevEl: '.swiper-button-prev',
+    //                     },
+
+    //                     // 如果需要滚动条
+    //                     scrollbar: {
+    //                         el: '.swiper-scrollbar',
+    //                     },
+    //                 })
+    //             })
+
+    //         }
+    //     }
+    // }
+};
 </script>
 
 <style lang="less" scoped>
