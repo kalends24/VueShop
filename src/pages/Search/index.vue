@@ -21,42 +21,48 @@
             <li class="with-x" v-if="searchParams.keyword">
               {{ searchParams.keyword }}<i @click="removeKeyword">x</i>
             </li>
-             <!-- 品牌的面包屑 -->
+            <!-- 品牌的面包屑 -->
             <li class="with-x" v-if="searchParams.trademark">
-              {{ searchParams.trademark.split(':')[1] }}<i @click="removeTrademark">x</i>
+              {{ searchParams.trademark.split(":")[1]
+              }}<i @click="removeTrademark">x</i>
             </li>
             <!-- 平添的售卖属性 -->
-            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">
-              {{ attrValue.split(':')[1] }}<i @click="removeAttr(index)">x</i>
+            <li
+              class="with-x"
+              v-for="(attrValue, index) in searchParams.props"
+              :key="index"
+            >
+              {{ attrValue.split(":")[1] }}<i @click="removeAttr(index)">x</i>
             </li>
           </ul>
         </div>
 
         <!--selector 子组件-->
-        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo"/>
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo" />
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{ active: isOne }" @click="changeOrder(1)">
+                  <a
+                    >综合
+                    <span
+                      v-show="isOne"
+                      class="iconfont"
+                      :class="{ 'icon-todown': isDesc, 'icon-up': isAsc }"
+                    ></span
+                  ></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{ active: isTwo }" @click="changeOrder(2)">
+                  <a
+                    >价格<span
+                      v-show="isTwo"
+                      class="iconfont"
+                      :class="{ 'icon-todown': isDesc, 'icon-up': isAsc }"
+                    ></span
+                  ></a>
                 </li>
               </ul>
             </div>
@@ -108,35 +114,7 @@
             </ul>
           </div>
           <!-- 分页器 -->
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+         <pagination :pageNo='1' :pageSize="3" :total="91" :continues="5" />
         </div>
       </div>
     </div>
@@ -166,7 +144,7 @@ export default {
         /* 关键字 */
         keyword: "",
         /* 排序 */
-        order: "",
+        order: "1:desc",
         /* 分页器 当前第几页 */
         pageNo: 1,
         /* 每一页展示数据个数 */
@@ -187,13 +165,27 @@ export default {
   },
   computed: {
     /*  ...mapState({
-               getSearchList:state=>{
-                 return state.search.searchList
-               }
-             }), */
+                   getSearchList:state=>{
+                     return state.search.searchList
+                   }
+                 }), */
     ...mapGetters(["goodsList"]),
+    /* 判断searchParams里oder属性值是否是升序还是降序 是否是综合或价格 */
+    isOne() {
+      return this.searchParams.order.indexOf("1") != -1;
+    },
+    isTwo() {
+      return this.searchParams.order.indexOf("2") != -1;
+    },
+    isAsc() {
+      return this.searchParams.order.indexOf("asc") != -1;
+    },
+    isDesc() {
+      return this.searchParams.order.indexOf("desc") != -1;
+    },
   },
   methods: {
+    /* 向vuex传递事件 并请求接口*/
     getData() {
       this.$store.dispatch("getSearchList", this.searchParams);
     },
@@ -205,7 +197,10 @@ export default {
       this.searchParams.category3id = undefined;
       this.getData();
       if (this.$route.params) {
-        this.$router.push({ name: "search", params: this.$route.params });
+        this.$router.push({
+          name: "search",
+          params: this.$route.params,
+        });
       }
     },
     /**删除关键字 */
@@ -215,33 +210,52 @@ export default {
       //通知兄弟组件Header清楚关键字
       this.$bus.$emit("clear");
       if (this.$route.query) {
-        this.$router.push({ name: "search", query: this.$route.query });
+        this.$router.push({
+          name: "search",
+          query: this.$route.query,
+        });
       }
     },
     /* 删除品牌的信息 */
-    removeTrademark(){
+    removeTrademark() {
       this.searchParams.trademark = undefined;
-       this.getData();
+      this.getData();
     },
     /* 绑定自定义事件 接收子组件传递的数据*/
     trademarkInfo(trademark) {
       this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
       this.getData();
     },
-     /* 绑定自定义事件 接收子组件传递的数据*/
-     attrInfo(attr,attrValue){
-       let props=`${attr.attrId}:${attrValue}:${attr.attrName}`;
-       //去重
-       if (this.searchParams.props.indexOf(props)==-1) {
-          this.searchParams.props.push(props)
-       }
-       this.getData()
-     },
-     /* 删除售卖属性 */
-     removeAttr(index){
-       this.searchParams.props.splice(index,1)
-        this.getData()
-     }
+    /* 绑定自定义事件 接收子组件传递的数据*/
+    attrInfo(attr, attrValue) {
+      let props = `${attr.attrId}:${attrValue}:${attr.attrName}`;
+      //去重
+      if (this.searchParams.props.indexOf(props) == -1) {
+        this.searchParams.props.push(props);
+      }
+      this.getData();
+    },
+    /* 删除售卖属性 */
+    removeAttr(index) {
+      this.searchParams.props.splice(index, 1);
+      this.getData();
+    },
+    /* 子传父 排序事件 */
+    changeOrder(flag) {
+      let originOrder = this.searchParams.order;
+      let originFlag = originOrder.split(":")[0];
+      let originSort = originOrder.split(":")[1];
+      let newOrder=''
+      if (flag == originFlag) {
+        newOrder = `${flag}:${originSort == "desc" ? "asc" : "desc"}`;
+        console.log(newOrder);
+      } else {
+        newOrder = `${flag}:${"desc"}`;
+      }
+      //这里不能用变量 originOrder 因为是函数内的变量
+      this.searchParams.order = newOrder;
+      this.getData();
+    },
   },
   watch: {
     $route(newValue, oldVale) {
