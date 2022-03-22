@@ -125,7 +125,7 @@ export default {
     leaveIndex() {
       //index：鼠标移入上某一个一级分类的元素的索引值
       this.currentIndex = -1;
-      if (this.$route.path == "/Search") {
+      if (this.$route.path != "/home") {
         this.show = false;
       } else {
         this.show = true;

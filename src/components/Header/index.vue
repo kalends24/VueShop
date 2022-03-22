@@ -77,14 +77,19 @@ export default {
       // });
       /* 如果有query参数也带过去 */
       if (this.$route.query) {
-        let location = {
+        let loction = {
           name: "search",
           params: { keyword: this.keyword || undefined },
         };
-        location.query = this.$route.query;
-        this.$router.push(location);
+        loction.query = this.$route.query;
+        this.$router.push(loction);
       }
     },
+  },
+  mounted() {
+    this.$bus.$on("clear", () => {
+      this.keyword = "";
+    });
   },
 };
 </script>

@@ -12,15 +12,28 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">iphone<i>×</i></li>
-            <li class="with-x">华为<i>×</i></li>
-            <li class="with-x">OPPO<i>×</i></li>
+            <!-- 分类的面包屑 -->
+            <li class="with-x" v-if="searchParams.categoryName">
+              {{ searchParams.categoryName
+              }}<i @click="removeCategoryName">x</i>
+            </li>
+            <!-- 关键字的面包屑 -->
+            <li class="with-x" v-if="searchParams.keyword">
+              {{ searchParams.keyword }}<i @click="removeKeyword">x</i>
+            </li>
+             <!-- 品牌的面包屑 -->
+            <li class="with-x" v-if="searchParams.trademark">
+              {{ searchParams.trademark.split(':')[1] }}<i @click="removeTrademark">x</i>
+            </li>
+            <!-- 平添的售卖属性 -->
+            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">
+              {{ attrValue.split(':')[1] }}<i @click="removeAttr(index)">x</i>
+            </li>
           </ul>
         </div>
 
         <!--selector 子组件-->
-        <SearchSelector />
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo"/>
 
         <!--details-->
         <div class="details clearfix">
@@ -174,28 +187,73 @@ export default {
   },
   computed: {
     /*  ...mapState({
-           getSearchList:state=>{
-             return state.search.searchList
-           }
-         }), */
+               getSearchList:state=>{
+                 return state.search.searchList
+               }
+             }), */
     ...mapGetters(["goodsList"]),
   },
   methods: {
     getData() {
       this.$store.dispatch("getSearchList", this.searchParams);
     },
+    /* 删除分类的名字 */
+    removeCategoryName() {
+      this.searchParams.categoryName = undefined;
+      this.searchParams.category1id = undefined;
+      this.searchParams.category2id = undefined;
+      this.searchParams.category3id = undefined;
+      this.getData();
+      if (this.$route.params) {
+        this.$router.push({ name: "search", params: this.$route.params });
+      }
+    },
+    /**删除关键字 */
+    removeKeyword() {
+      this.searchParams.keyword = undefined;
+      this.getData();
+      //通知兄弟组件Header清楚关键字
+      this.$bus.$emit("clear");
+      if (this.$route.query) {
+        this.$router.push({ name: "search", query: this.$route.query });
+      }
+    },
+    /* 删除品牌的信息 */
+    removeTrademark(){
+      this.searchParams.trademark = undefined;
+       this.getData();
+    },
+    /* 绑定自定义事件 接收子组件传递的数据*/
+    trademarkInfo(trademark) {
+      this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
+      this.getData();
+    },
+     /* 绑定自定义事件 接收子组件传递的数据*/
+     attrInfo(attr,attrValue){
+       let props=`${attr.attrId}:${attrValue}:${attr.attrName}`;
+       //去重
+       if (this.searchParams.props.indexOf(props)==-1) {
+          this.searchParams.props.push(props)
+       }
+       this.getData()
+     },
+     /* 删除售卖属性 */
+     removeAttr(index){
+       this.searchParams.props.splice(index,1)
+        this.getData()
+     }
   },
-  watch:{
-    $route(newValue,oldVale){
+  watch: {
+    $route(newValue, oldVale) {
       //再次发请求之前整理带给服务器参数
       Object.assign(this.searchParams, this.$route.query, this.$route.params);
       //再次发送服务器请求
       this.getData();
-      this.searchParams.category1id=''
-      this.searchParams.category2id=''
-      this.searchParams.category3id=''
-    }
-  }
+      this.searchParams.category1id = "";
+      this.searchParams.category2id = "";
+      this.searchParams.category3id = "";
+    },
+  },
 };
 </script>
 
